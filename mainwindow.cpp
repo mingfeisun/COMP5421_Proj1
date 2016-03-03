@@ -199,12 +199,14 @@ void MainWindow::newSeed(int i, int j)
 {
     img_pro->drawSeed(i, j);
     picLabel->setPixmap(img_pro->toPixmap());
+    emit seedChanged();
 }
 
 void MainWindow::routing(int i, int j)
 {
     img_pro->currPos(i, j);
     picLabel->setPixmap(img_pro->toPixmap());
+    emit mouseMove();
 }
 
 void MainWindow::routingOver(int i, int j)
@@ -222,20 +224,40 @@ void MainWindow::routingOver(int i, int j)
 void MainWindow::debugMode(int ind)
 {
     if(ind == -1 || ind == 0){
+        disconnect(this, SIGNAL(mouseMove()), this, SLOT(showDebugMinPath()));
+        disconnect(this, SIGNAL(seedChanged()), this, SLOT(showDebugPathGraph()));
         return;
     }
     if(ind == 1){
         pixelNodeLabel->setPixmap(img_pro->toPixelNodePixmap());
+        disconnect(this, SIGNAL(mouseMove()), this, SLOT(showDebugMinPath()));
+        disconnect(this, SIGNAL(seedChanged()), this, SLOT(showDebugPathGraph()));
     }
     if(ind == 2){
         costGraphLabel->setPixmap(img_pro->toCostGraphPixmap());
+        disconnect(this, SIGNAL(mouseMove()), this, SLOT(showDebugMinPath()));
+        disconnect(this, SIGNAL(seedChanged()), this, SLOT(showDebugPathGraph()));
     }
     if(ind == 3){
         pathTreeLabel->setPixmap(img_pro->toPathTreePixmap());
+        connect(this, SIGNAL(seedChanged()), this, SLOT(showDebugPathGraph()));
+        disconnect(this, SIGNAL(mouseMove()), this, SLOT(showDebugMinPath()));
     }
     if(ind == 4){
         minPathLabel->setPixmap(img_pro->toMinPathPixmap());
+        connect(this, SIGNAL(mouseMove()), this, SLOT(showDebugMinPath()));
+        disconnect(this, SIGNAL(seedChanged()), this, SLOT(showDebugPathGraph()));
     }
+}
+
+void MainWindow::showDebugMinPath()
+{
+    minPathLabel->setPixmap(img_pro->toMinPathPixmap());
+}
+
+void MainWindow::showDebugPathGraph()
+{
+    pathTreeLabel->setPixmap(img_pro->toPathTreePixmap());
 }
 
 void MainWindow::createActions()

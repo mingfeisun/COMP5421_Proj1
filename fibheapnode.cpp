@@ -90,6 +90,7 @@ void FibHeapNode::operator =(FibHeapNode& RHS)
      this->pix = (pixel*)malloc(sizeof(pixel));
      this->pix->col = RHS.pix->col;
      this->pix->row = RHS.pix->row;
+     this->pix->steps = RHS.pix->steps;
      this->pix->t_cost = RHS.pix->t_cost;
      this->pix->state = RHS.pix->state;
      this->pix->pre = RHS.pix->pre;

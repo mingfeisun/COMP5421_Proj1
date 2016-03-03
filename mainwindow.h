@@ -22,6 +22,8 @@ protected:
 
 signals:
     void pixmapChanged(QPixmap);
+    void mouseMove();
+    void seedChanged();
 
 private slots:
     void open();
@@ -45,6 +47,8 @@ private slots:
     void routing(int, int);
     void routingOver(int, int);
     void debugMode(int);
+    void showDebugMinPath();
+    void showDebugPathGraph();
 
 private:
     void initLogo();

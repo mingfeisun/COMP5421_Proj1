@@ -16,6 +16,7 @@ private:
     const double max_cost = 1e8;
     int width;
     int height;
+    double maxD=0;
     uint depth;
     uint*** im;
     int** cont;
@@ -142,32 +143,29 @@ ImgPro::ImgPro(QPixmap *pixmap){
 void ImgPro::mapCost(uint x, uint y, double *cost){
     double temp;
     for(int i=0; i<3; i++){
-        temp=1.0*abs(im[i][y][x-1]+im[i][y+1][x-1]-im[i][y][x+1]-im[i][y+1][x+1])/4;
+        temp=1.0*abs(im[i][x-1][y]+im[i][x-1][y+1]-im[i][x+1][y]-im[i][x+1][y+1])/4;
         cost[0]+=temp*temp;
-        temp=1.0*abs(im[i][y+1][x-1]+im[i][y+1][x]-im[i][y-1][x-1]-im[i][y-1][x])/4;
+        temp=1.0*abs(im[i][x-1][y-1]+im[i][x][y-1]-im[i][x-1][y+1]-im[i][x][y+1])/4;
         cost[2]+=temp*temp;
-        temp=1.0*abs(im[i][y-1][x-1]+im[i][y][x-1]-im[i][y-1][x+1]-im[i][y][x+1])/4;
+        temp=1.0*abs(im[i][x-1][y-1]+im[i][x-1][y]-im[i][x+1][y-1]-im[i][x+1][y])/4;
         cost[4]+=temp*temp;
-        temp=1.0*abs(im[i][y-1][x]+im[i][y-1][x+1]-im[i][y+1][x]-im[i][y+1][x+1])/4;
+        temp=1.0*abs(im[i][x][y-1]+im[i][x+1][y-1]-im[i][x][y+1]-im[i][x+1][y+1])/4;
         cost[6]+=temp*temp;
-        temp=abs(im[i][y][x-1]-im[i][y+1][x+1])/sqrt(2.0);
+        temp=abs(im[i][x-1][y]-im[i][x][y+1])/sqrt(2.0);
         cost[1]+=temp*temp;
-        temp=abs(im[i][y][x-1]-im[i][y-1][x])/sqrt(2.0);
+        temp=abs(im[i][x-1][y]-im[i][x][y-1])/sqrt(2.0);
         cost[3]+=temp*temp;
-        temp=abs(im[i][y-1][x]-im[i][y][x+1])/sqrt(2.0);
+        temp=abs(im[i][x][y-1]-im[i][x+1][y])/sqrt(2.0);
         cost[5]+=temp*temp;
-        temp=abs(im[i][y][x+1]-im[i][y+1][x])/sqrt(2.0);
+        temp=abs(im[i][x+1][y]-im[i][x][y+1])/sqrt(2.0);
         cost[7]+=temp*temp;
     }
     temp=0;
     for(int i=0; i<8; i++){
         cost[i]=sqrt(cost[i]/3);
-        if(temp<cost[i]){
-            temp=cost[i];
+        if(maxD<cost[i]){
+            maxD=cost[i];
         }
-    }
-    for(int i=0; i<8; i++){
-        cost[i]=(temp-cost[i])*(i%2==0?1:sqrt(2));
     }
 }
 
@@ -176,15 +174,26 @@ void ImgPro::genPixelMapCost(){
         for(int j=1; j<width-1; j++){
             pixel* curr = &px[i][j];
             curr->col=j; curr->row=i;
+            curr->steps = 0;
             curr->pre=NULL; curr->state=0;
             curr->t_cost=max_cost;
             memset(curr->cost, 0, sizeof(curr->cost));
-            mapCost(j, i, curr->cost);
+            mapCost(i, j, curr->cost);
+        }
+    }
+    for(int i=1; i<height-1; i++){
+        for(int j=1; j<width-1; j++){
+            pixel* curr = &px[i][j];
+            for(int k=0; k<8; k++){
+                curr->cost[k] = (maxD-curr->cost[k])
+                        *(k%2==0?1:sqrt(2.0));
+            }
         }
     }
     for(int i=0; i<height; i++){
         pixel* curr = &px[i][0];
         curr->col=0; curr->row=i;
+        curr->steps=0;
         curr->pre=&px[i][1]; curr->state=0;
         curr->t_cost=max_cost;
         for(uint j=0; j<8; j++){
@@ -201,6 +210,7 @@ void ImgPro::genPixelMapCost(){
     for(int i=0; i<width; i++){
         pixel* curr = &px[0][i];
         curr->col=i; curr->row=0;
+        curr->steps=0;
         curr->pre=&px[1][i]; curr->state=0;
         curr->t_cost=max_cost;
         for(uint j=0; j<8; j++){
@@ -208,6 +218,7 @@ void ImgPro::genPixelMapCost(){
         }
         curr = &px[height-1][i];
         curr->col=i; curr->row=height-1;
+        curr->steps=0;
         curr->pre=&px[height-2][i]; curr->state=0;
         curr->t_cost=max_cost;
         for(uint j=0; j<8; j++){
@@ -240,21 +251,25 @@ void ImgPro::genPathTree(int x, int y){
             if(curr->row + lin_y[i] < 0){
                 curr->t_cost = max_cost;
                 curr->pre = &px[1][curr->col];
+                curr->steps = curr->pre->steps+1;
                 continue;
             }
             if(curr->row + lin_y[i] > height-1){
                 curr->t_cost = max_cost;
                 curr->pre = &px[height-2][curr->col];
+                curr->steps = curr->pre->steps+1;
                 continue;
             }
             if(curr->col + lin_x[i] < 0){
                 curr->t_cost = max_cost;
                 curr->pre = &px[curr->row][1];
+                curr->steps = curr->pre->steps+1;
                 continue;
             }
             if(curr->col + lin_x[i] > width-1){
                 curr->t_cost = max_cost;
                 curr->pre = &px[curr->row][width-2];
+                curr->steps = curr->pre->steps+1;
                 continue;
             }
 
@@ -266,6 +281,7 @@ void ImgPro::genPathTree(int x, int y){
                     neib->pre=curr;
                     neib->t_cost = curr->t_cost + curr->cost[i];
                     neib->state = 1;
+                    neib->steps=curr->steps+1;
                     pq.Insert(neib_node);
                 }
                 else{
@@ -274,6 +290,7 @@ void ImgPro::genPathTree(int x, int y){
                         FibHeapNode new_neib_node = *neib_node;
                         new_neib_node.pix->t_cost = sum_cost;
                         new_neib_node.pix->pre = curr;
+                        new_neib_node.pix->steps = curr->steps+1;
                         pq.DecreaseKey(neib_node, new_neib_node);
                     }
                 }
@@ -354,7 +371,7 @@ void ImgPro::traversePath(pixel **curr_px, int x, int y, int** cont_c, bool clea
 }
 
 void ImgPro::currPos(int x, int y){
-    if(x >= width || y >= height || x<=3 || y<=3){
+    if(x >= width || y >= height || x<=2 || y<=2){
         for(int i=0; i<height; i++){
             memset(cont_temp[i], 0, width*sizeof(int));
         }
@@ -381,7 +398,7 @@ QPixmap ImgPro::toPixmap(){
         for(int j=0; j<width; j++){
             QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
             if(cont[i][j] != 0 || cont_temp[i][j] != 0){
-                color.setRed(255); color.setGreen(255); color.setBlue(255);
+                color.setRed(255); color.setGreen(0); color.setBlue(0);
             }
             QPoint p(j,i);
             img.setPixel(p, color.rgb());
@@ -413,7 +430,21 @@ QPixmap ImgPro::toMaskPixmap()
 
 QPixmap ImgPro::toPixelNodePixmap()
 {
-
+    QImage img(3*width, 3*height, QImage::Format_RGB32);
+    for(int i=0; i<height; i++){
+        for(int j=0; j<width; j++){
+            QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
+            QPoint p(3*j+1,3*i+1);
+            img.setPixel(p, color.rgb());
+            for(int k=0; k<8; k++){
+                p.setX(3*j+1+lin_x[k]);
+                p.setY(3*i+1+lin_y[k]);
+                color.setRed(0); color.setGreen(0); color.setBlue(0);
+                img.setPixel(p, color.rgb());
+            }
+        }
+    }
+    return QPixmap::fromImage(img);
 }
 
 QPixmap ImgPro::toCostGraphPixmap()
@@ -427,7 +458,7 @@ QPixmap ImgPro::toCostGraphPixmap()
             for(int k=0; k<8; k++){
                 p.setX(3*j+1+lin_x[k]);
                 p.setY(3*i+1+lin_y[k]);
-                double temp = px[i][j].cost[k] == max_cost ? 0 : px[i][j].cost[k];
+                double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
                 color.setRed(temp);
                 color.setGreen(temp);
                 color.setBlue(temp);
@@ -440,24 +471,45 @@ QPixmap ImgPro::toCostGraphPixmap()
 
 QPixmap ImgPro::toPathTreePixmap()
 {
+    if(curr_seed->pre == NULL){
+        return QPixmap();
+    }
+    pixel** temp_px = curr_seed->pre->px;
+    int seed_x = curr_seed->pre->x;
+    int seed_y = curr_seed->pre->y;
     QImage img(3*width, 3*height, QImage::Format_RGB32);
-    for(int i=0; i<height; i++){
-        for(int j=0; j<width; j++){
-            QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
+    for(int i=1; i<height-1; i++){
+        for(int j=1; j<width-1; j++){
+            if(i==seed_y && j==seed_x){
+                continue;
+            }
+            //QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
+            QColor color(255,0,0);
             QPoint p(3*j+1,3*i+1);
             img.setPixel(p, color.rgb());
             for(int k=0; k<8; k++){
-                int off_x = 3*j+1+lin_x[k];
-                int off_y = 3*i+1+lin_y[k];
-                p.setX(off_x);
-                p.setY(off_y);
-                double temp = ((px[i][j].pre->row && px[i][j].pre->col)
-                        ? 255:0);
+                p.setX(3*j+1+lin_x[k]);
+                p.setY(3*i+1+lin_y[k]);
+                //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
+                double temp = 255;
                 color.setRed(temp);
                 color.setGreen(temp);
                 color.setBlue(temp);
                 img.setPixel(p, color.rgb());
             }
+            int diff_x = temp_px[i][j].pre->col - j;
+            int diff_y = temp_px[i][j].pre->row - i;
+            color.setRed(255);
+            color.setGreen(0);
+            color.setBlue(0);
+            p.setX(3*j+1); p.setY(3*i+1);
+            img.setPixel(p, color.rgb());
+            p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
+            img.setPixel(p, color.rgb());
+            p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
+            img.setPixel(p, color.rgb());
+            p.setX(3*j+1+3*diff_x); p.setY(3*i+1+3*diff_y);
+            img.setPixel(p, color.rgb());
         }
     }
     return QPixmap::fromImage(img);
@@ -465,5 +517,54 @@ QPixmap ImgPro::toPathTreePixmap()
 
 QPixmap ImgPro::toMinPathPixmap()
 {
+    if(curr_seed->pre == NULL){
+        return QPixmap();
+    }
+    pixel** temp_px = NULL;
+    temp_px = curr_seed->pre->px;
+    int seed_x = curr_seed->pre->x;
+    int seed_y = curr_seed->pre->y;
+    QImage img(3*width, 3*height, QImage::Format_RGB32);
+    for(int i=1; i<height-1; i++){
+        for(int j=1; j<width-1; j++){
+            if(i==seed_y && j==seed_x){
+                continue;
+            }
+            //QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
+            QColor color(255,0,0);
+            QPoint p(3*j+1,3*i+1);
+            img.setPixel(p, color.rgb());
+            for(int k=0; k<8; k++){
+                p.setX(3*j+1+lin_x[k]);
+                p.setY(3*i+1+lin_y[k]);
+                //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
+                double temp = 255;
+                color.setRed(temp);
+                color.setGreen(temp);
+                color.setBlue(temp);
+                img.setPixel(p, color.rgb());
+            }
+            int diff_x = temp_px[i][j].pre->col - j;
+            int diff_y = temp_px[i][j].pre->row - i;
+            color.setRed(255);
+            color.setGreen(0);
+            color.setBlue(0);
+            p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
+            img.setPixel(p, color.rgb());
+            p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
+            img.setPixel(p, color.rgb());
+            if( cont_temp[i][j] != 0){
+                color.setRed(0); color.setGreen(0); color.setBlue(0);
+                p.setX(3*j); p.setY(3*i);
+                img.setPixel(p, color.rgb());
+                p.setX(3*j+1); p.setY(3*i+1);
+                img.setPixel(p, color.rgb());
+                p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
+                img.setPixel(p, color.rgb());
+                p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
+            }
+        }
+    }
+    return QPixmap::fromImage(img);
 
 }

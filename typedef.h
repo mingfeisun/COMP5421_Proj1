@@ -4,6 +4,7 @@
 typedef struct pixel{
     int col, row;
     int state;
+    int steps;
     double cost[8];
     double t_cost;
     pixel* pre;
