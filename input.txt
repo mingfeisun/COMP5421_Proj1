@@ -1,0 +1,64 @@
+    ui->textEdit->setPlainText(line);
+    QTextCursor cursor = ui->textEdit->textCursor();
+    cursor.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor, 1);
+}FindWholeWords);
+}
+Once both of these functions are complete, add a line to call loadTextFile() in the constructor, as illustrated by the following code snippet:
+TextFinder::TextFinder(QWidget *parent)
+    : QWidget(parent), ui(new Ui::TextFinder)
+{
+    ui->setupUi(this);
+    loadTextFile();
+}
+To use QFile and QTextStream, add the following #includes to textfinder.cpp:
+#include <QFile>
+#include <QTextStream>
+For the on_findButton_clicked() slot, add code to extract the search string and use the QTextEdit::find() function to look for the search string within the text file. This is illustrated by the following code snippet:
+void TextFinder::on_findButton_clicked()
+{
+    QString searchString = ui->lineEdit->text();
+    ui->textEdit->find(searchString, QTextDocument::h of these functions are complete, add a line to call loadTextFile() in the constructor, as illustrated by the following code snippet:
+TextFinder::TextFinder(QWidget *parent)
+    : QWidget(parent), ui(new Ui::TextFinder)
+{
+    ui->setupUi(this);
+    loadTextFile();
+}
+To use QFile and QTextStream, add the following #includes to textfinder.cpp:
+#include <QFile>
+#include <QTextStream>
+For the on_findButton_clicked() slot, add code to extract the search string and use the QTextEdit::find() function to look for the search string within the text file. This is illustrated by the following code snippet:
+void TextFinder::on_findButton_clicked()
+{
+    QString searchString = ui->lineEdit->text();
+    ui->textEdit->find(searchStr
+To use QFile and QTextStream, add the following #includes to textfinder.cpp:
+#include <QFile>
+#include <QTextStream>
+For the on_findButton_clicked() slot, add code to extract the search string and use the QTextEdit::find() function to look for the search string within the text file. This is illustrated by the following code snippet:
+void TextFinder::on_findButton_clicked()
+{
+    QString searchString = ui->lineEdit->text();
+    ui->textEdit->find(searchString, QTextDocument::
+To use QFile and QTextStream, add the following #includes to textfinder.cpp:
+#include <QFile>
+#include <QTextStream>
+For the on_findButton_clicked() slot, add code to extract the search string and use the QTextEdit::find() function to look for the search string within the text file. This is illustrated by the following code snippet:
+void TextFinder::on_findButton_clicked()
+{
+    QString searchString = ui->lineEdit->text();
+    ui->textEdit->find(searchString, QTextDocument::
+To use QFile and QTextStream, add the following #includes to textfinder.cpp:
+#include <QFile>
+#include <QTextStream>
+For the on_findButton_clicked() slot, add code to extract the search string and use the QTextEdit::find() function to look for the search string within the text file. This is illustrated by the following code snippet:
+void TextFinder::on_findButton_clicked()
+{
+    QString searchString = ui->lineEdit->text();
+    ui->textEdit->find(searchString, QTextDocument::
+The on_findButton_clicked() slot is called automatically in the uic generated ui_textfinder.h file by this line of code:
+
+QMetaObject::connectSlotsByName(TextFinder);
+Creating a Resource File
+
+You need a resource file (.qrc) within which you embed the input text file. The input file can be any .txt file with a paragraph of te

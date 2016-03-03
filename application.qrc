@@ -1,0 +1,24 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>logo_eye.gif</file>
+        <file>copy.png</file>
+        <file>cut.png</file>
+        <file>new.png</file>
+        <file>open.png</file>
+        <file>paste.png</file>
+        <file>pic.png</file>
+        <file>redo.png</file>
+        <file>rotate.png</file>
+        <file>save.png</file>
+        <file>undo.png</file>
+        <file>zoom-in.png</file>
+        <file>zoom-out.png</file>
+        <file>avatar.jpg</file>
+        <file>lenna.tif</file>
+        <file>avatar_icon.jpg</file>
+        <file>lenna_icon.png</file>
+        <file>bug.png</file>
+        <file>contour.png</file>
+        <file>mask.png</file>
+    </qresource>
+</RCC>
