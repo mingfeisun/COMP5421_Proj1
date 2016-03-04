@@ -450,7 +450,7 @@ bool MainWindow::saveFile(const QString &fileName)
         new_save = img_pro->toPixmap();
     }
     if(img_pro->curr_mode == 1){
-        new_save = img_pro->toMaskPixmap();
+        new_save = img_pro->toMaskSavedPixmap();
     }
     if(!new_save.save(fileName)) {
         QMessageBox::warning(this, tr("Save Image"),

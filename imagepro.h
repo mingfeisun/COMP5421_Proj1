@@ -22,6 +22,10 @@ private:
     int** cont;
     int** cont_temp;
     int** mask;
+    int mask_top_left_x;
+    int mask_top_left_y;
+    int mask_bottom_right_x;
+    int mask_bottom_right_y;
     const int lin_x[8]={+1, +1,  0, -1, -1, -1,  0, +1};
     const int lin_y[8]={ 0, -1, -1, -1,  0, +1, +1, +1};
 
@@ -418,11 +422,19 @@ QPixmap ImgPro::toMaskPixmap()
     }
     mapFlood(1, 1);
     QImage img(width, height, QImage::Format_RGB32);
+    mask_top_left_x = width;
+    mask_top_left_y = height;
+    mask_bottom_right_x = 0;
+    mask_bottom_right_y = 0;
     for(int i=0; i<height; i++){
         for(int j=0; j<width; j++){
             QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
             if(mask[i][j] == 1){
                 color.setRed(0); color.setGreen(0); color.setBlue(0);
+                mask_top_left_x = (mask_top_left_x > j) ? j : mask_top_left_x;
+                mask_top_left_y = (mask_top_left_y > i) ? i : mask_top_left_y;
+                mask_bottom_right_x = (mask_bottom_right_x < j) ? j : mask_bottom_right_x;
+                mask_bottom_right_y = (mask_bottom_right_y < i) ? i : mask_bottom_right_y;
             }
             QPoint p(j,i);
             img.setPixel(p, color.rgb());
@@ -433,7 +445,19 @@ QPixmap ImgPro::toMaskPixmap()
 
 QPixmap ImgPro::toMaskSavedPixmap()
 {
-   QPixmap mask_img = toMaskPixmap();
+    int temp_width = mask_bottom_right_x-mask_top_left_x;
+    int temp_height = mask_bottom_right_y-mask_top_left_y;
+    QImage img(temp_width, temp_height, QImage::Format_RGB32);
+    for(int i=0; i<temp_height; i++){
+        for(int j=0; j<temp_width; j++){
+            QColor color(im[0][i+mask_top_left_y][j+mask_top_left_x],
+                            im[1][i+mask_top_left_x][j+mask_top_left_x],
+                            im[2][i+mask_top_left_x][j+mask_top_left_x]);
+            QPoint p(j,i);
+            img.setPixel(p, color.rgb());
+        }
+    }
+    return QPixmap::fromImage(img);
 }
 
 QPixmap ImgPro::toPixelNodePixmap()
