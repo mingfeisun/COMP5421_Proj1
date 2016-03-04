@@ -17,6 +17,7 @@ private:
     int width;
     int height;
     double maxD=0;
+    int maxS=0;
     uint depth;
     uint*** im;
     int** cont;
@@ -281,24 +282,28 @@ void ImgPro::genPathTree(int x, int y){
                 curr->t_cost = max_cost;
                 curr->pre = &px[1][curr->col];
                 curr->steps = curr->pre->steps+1;
+                maxS = maxS<curr->steps ? curr->steps : maxS;
                 continue;
             }
             if(curr->row + lin_y[i] > height-1){
                 curr->t_cost = max_cost;
                 curr->pre = &px[height-2][curr->col];
                 curr->steps = curr->pre->steps+1;
+                maxS = maxS<curr->steps ? curr->steps : maxS;
                 continue;
             }
             if(curr->col + lin_x[i] < 0){
                 curr->t_cost = max_cost;
                 curr->pre = &px[curr->row][1];
                 curr->steps = curr->pre->steps+1;
+                maxS = maxS<curr->steps ? curr->steps : maxS;
                 continue;
             }
             if(curr->col + lin_x[i] > width-1){
                 curr->t_cost = max_cost;
                 curr->pre = &px[curr->row][width-2];
                 curr->steps = curr->pre->steps+1;
+                maxS = maxS<curr->steps ? curr->steps : maxS;
                 continue;
             }
 
@@ -311,6 +316,7 @@ void ImgPro::genPathTree(int x, int y){
                     neib->t_cost = curr->t_cost + curr->cost[i];
                     neib->state = 1;
                     neib->steps=curr->steps+1;
+                    maxS = maxS<curr->steps ? curr->steps : maxS;
                     pq.Insert(neib_node);
                 }
                 else{
@@ -320,6 +326,7 @@ void ImgPro::genPathTree(int x, int y){
                         new_neib_node.pix->t_cost = sum_cost;
                         new_neib_node.pix->pre = curr;
                         new_neib_node.pix->steps = curr->steps+1;
+                        maxS = maxS<curr->steps ? curr->steps : maxS;
                         pq.DecreaseKey(neib_node, new_neib_node);
                     }
                 }
@@ -540,38 +547,25 @@ QPixmap ImgPro::toPathTreePixmap()
     int seed_x = curr_seed->pre->x;
     int seed_y = curr_seed->pre->y;
     QImage img(3*width, 3*height, QImage::Format_RGB32);
+    img.fill(Qt::white);
     for(int i=1; i<height-1; i++){
         for(int j=1; j<width-1; j++){
             if(i==seed_y && j==seed_x){
+                QColor color(255,0,0);
+                QPoint p(3*j+1,3*i+1);
+                img.setPixel(p, color.rgb());
                 continue;
             }
-            //QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
-            QColor color(255,0,0);
+            int color_val = (int)temp_px[i][j].steps*1.0/maxS*250;
+            QColor color(color_val,color_val,255);
             QPoint p(3*j+1,3*i+1);
-            img.setPixel(p, color.rgb());
-            double temp = 255;
-            for(int k=0; k<8; k++){
-                p.setX(3*j+1+lin_x[k]);
-                p.setY(3*i+1+lin_y[k]);
-                //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
-                color.setRed(temp);
-                color.setGreen(temp);
-                color.setBlue(temp);
-                img.setPixel(p, color.rgb());
-            }
             int diff_x = temp_px[i][j].pre->col - j;
             int diff_y = temp_px[i][j].pre->row - i;
-            color.setRed(255);
-            color.setGreen(0);
-            color.setBlue(0);
-            //p.setX(3*j+1); p.setY(3*i+1);
-            //img.setPixel(p, color.rgb());
+            img.setPixel(p, color.rgb());
             p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
             img.setPixel(p, color.rgb());
             p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
             img.setPixel(p, color.rgb());
-            //p.setX(3*j+1+3*diff_x); p.setY(3*i+1+3*diff_y);
-            //img.setPixel(p, color.rgb());
         }
     }
     return QPixmap::fromImage(img);
@@ -587,36 +581,23 @@ QPixmap ImgPro::toMinPathPixmap()
     int seed_x = curr_seed->pre->x;
     int seed_y = curr_seed->pre->y;
     QImage img(3*width, 3*height, QImage::Format_RGB32);
+    img.fill(Qt::white);
     for(int i=1; i<height-1; i++){
         for(int j=1; j<width-1; j++){
             if(i==seed_y && j==seed_x){
+                QColor color(255,0,0);
+                QPoint p(3*j+1,3*i+1);
+                img.setPixel(p, color.rgb());
                 continue;
             }
-            //QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
-            QColor color(255,0,0);
+            int color_val = (int)temp_px[i][j].steps*1.0/maxS*250;
+            QColor color(color_val,color_val,255);
             QPoint p(3*j+1,3*i+1);
-            img.setPixel(p, color.rgb());
-            double temp = 255;
-            for(int k=0; k<8; k++){
-                p.setX(3*j+1+lin_x[k]);
-                p.setY(3*i+1+lin_y[k]);
-                //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
-                color.setRed(temp);
-                color.setGreen(temp);
-                color.setBlue(temp);
-                img.setPixel(p, color.rgb());
-            }
             int diff_x = temp_px[i][j].pre->col - j;
             int diff_y = temp_px[i][j].pre->row - i;
-            color.setRed(255);
-            color.setGreen(0);
-            color.setBlue(0);
-            p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
-            img.setPixel(p, color.rgb());
-            p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
-            img.setPixel(p, color.rgb());
+
             if( cont_temp[i][j] != 0){
-                color.setRed(0); color.setGreen(0); color.setBlue(0);
+                color.setRed(255); color.setGreen(0); color.setBlue(0);
                 p.setX(3*j); p.setY(3*i);
                 img.setPixel(p, color.rgb());
                 p.setX(3*j+1); p.setY(3*i+1);
@@ -624,6 +605,13 @@ QPixmap ImgPro::toMinPathPixmap()
                 p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
                 img.setPixel(p, color.rgb());
                 p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
+            }
+            else{
+                img.setPixel(p, color.rgb());
+                p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
+                img.setPixel(p, color.rgb());
+                p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
+                img.setPixel(p, color.rgb());
             }
         }
     }
