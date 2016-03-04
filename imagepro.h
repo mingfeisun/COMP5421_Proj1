@@ -421,7 +421,7 @@ QPixmap ImgPro::toMaskPixmap()
         memset(mask[i], 0, width*sizeof(int));
     }
     mapFlood(1, 1);
-    QImage img(width, height, QImage::Format_RGB32);
+    QImage m_img(width, height, QImage::Format_ARGB32);
     mask_top_left_x = width;
     mask_top_left_y = height;
     mask_bottom_right_x = 0;
@@ -429,35 +429,39 @@ QPixmap ImgPro::toMaskPixmap()
     for(int i=0; i<height; i++){
         for(int j=0; j<width; j++){
             QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
-            if(mask[i][j] == 1){
-                color.setRed(0); color.setGreen(0); color.setBlue(0);
+            color.setAlpha(0);
+            if(mask[i][j] == 0){
+                color.setAlpha(255);
                 mask_top_left_x = (mask_top_left_x > j) ? j : mask_top_left_x;
                 mask_top_left_y = (mask_top_left_y > i) ? i : mask_top_left_y;
                 mask_bottom_right_x = (mask_bottom_right_x < j) ? j : mask_bottom_right_x;
                 mask_bottom_right_y = (mask_bottom_right_y < i) ? i : mask_bottom_right_y;
             }
             QPoint p(j,i);
-            img.setPixel(p, color.rgb());
+            m_img.setPixel(p, color.rgba());
         }
     }
-    return QPixmap::fromImage(img);
+    return QPixmap::fromImage(m_img);
 }
 
 QPixmap ImgPro::toMaskSavedPixmap()
 {
     int temp_width = mask_bottom_right_x-mask_top_left_x;
     int temp_height = mask_bottom_right_y-mask_top_left_y;
-    QImage img(temp_width, temp_height, QImage::Format_RGB32);
+    QImage n_img(temp_width, temp_height, QImage::Format_ARGB32);
     for(int i=0; i<temp_height; i++){
         for(int j=0; j<temp_width; j++){
             QColor color(im[0][i+mask_top_left_y][j+mask_top_left_x],
-                            im[1][i+mask_top_left_x][j+mask_top_left_x],
-                            im[2][i+mask_top_left_x][j+mask_top_left_x]);
+                            im[1][i+mask_top_left_y][j+mask_top_left_x],
+                            im[2][i+mask_top_left_y][j+mask_top_left_x]);
+            if(mask[i+mask_top_left_y][j+mask_top_left_x] == 1){
+                color.setAlpha(0);
+            }
             QPoint p(j,i);
-            img.setPixel(p, color.rgb());
+            n_img.setPixel(p, color.rgba());
         }
     }
-    return QPixmap::fromImage(img);
+    return QPixmap::fromImage(n_img);
 }
 
 QPixmap ImgPro::toPixelNodePixmap()

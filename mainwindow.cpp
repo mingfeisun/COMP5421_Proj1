@@ -83,8 +83,8 @@ bool MainWindow::saveAs()
     QFileDialog dialog(this);
     dialog.setWindowModality(Qt::WindowModal);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setDefaultSuffix("jpg");
-    dialog.setNameFilter("jpg");
+    dialog.setDefaultSuffix("png");
+    dialog.setNameFilter("png");
     QStringList files;
     if (dialog.exec())
         files = dialog.selectedFiles();
@@ -132,6 +132,7 @@ bool MainWindow::contour(){
 }
 
 bool MainWindow::mask(){
+    img_pro->curr_mode = 1;
     maskAct->setEnabled(false);
     contourAct->setEnabled(true);
     picLabel->setPixmap(img_pro->toMaskPixmap());
@@ -452,7 +453,7 @@ bool MainWindow::saveFile(const QString &fileName)
     if(img_pro->curr_mode == 1){
         new_save = img_pro->toMaskSavedPixmap();
     }
-    if(!new_save.save(fileName)) {
+    if(!new_save.save(fileName, "PNG")) {
         QMessageBox::warning(this, tr("Save Image"),
                              tr("Cannot save image %1.")
                              .arg(fileName));
