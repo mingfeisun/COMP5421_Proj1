@@ -34,6 +34,7 @@ private:
     seed* first_seed;
 
     void mapFlood(int x, int y);
+    void findClosestSeed(int* x, int* y);
     void genPathTree(int init_x, int init_y);
     void mapCost(uint x, uint y, double* cost);
     void genPixelMapCost();
@@ -102,6 +103,27 @@ void ImgPro::mapFlood(int x, int y)
             mask[c_y+1][c_x] = 3;
         }
     }
+}
+
+void ImgPro::findClosestSeed(int* x, int* y)
+{
+    if(*x <= 2 || *y <=2 || *x>=width-3 || *y>=height-3){
+        return;
+    }
+    double temp_min_cost=max_cost;
+    int t_x=0;
+    int t_y=0;
+    for(int i=-3; i<=3; i++){
+        for(int j=-3; j<=3; j++){
+            for(int k=0; k<8; k++){
+                if(temp_min_cost > px[*y+i][*x+j].cost[k]){
+                    temp_min_cost = px[*y+i][*x+j].cost[k];
+                    t_x=*x+j; t_y=*y+i;
+                }
+            }
+        }
+    }
+    *x = t_x; *y = t_y;
 }
 
 ImgPro::ImgPro(QPixmap *pixmap){
@@ -329,6 +351,8 @@ void ImgPro::drawSeed(int x, int y){
     //x = 110; y=89;
     if(x<0 || y<0 || x>width-1 || y>height-1)
         return;
+
+    findClosestSeed(&x, &y);
 
     curr_seed->x = x;
     curr_seed->y = y;
