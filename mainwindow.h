@@ -31,14 +31,9 @@ private slots:
     void openAvatar();
     bool save();
     bool saveAs();
-    bool copy();
-    bool cut();
-    bool paste();
     bool zoomIn();
     bool zoomOut();
-    bool rotate();
     bool undo();
-    bool redo();
     bool contour();
     bool mask();
     bool debug();
@@ -47,11 +42,13 @@ private slots:
     void routing(int, int);
     void routingOver(int, int);
     void debugMode(int);
+    void showOriginalImg(QPixmap);
     void showDebugMinPath();
     void showDebugPathGraph();
 
 private:
     void initLogo();
+    void initDisable(bool val);
     void createActions();
     void createMenus();
     void createToolBars();
@@ -97,14 +94,9 @@ private:
     QAction *saveAct;
     QAction *saveAsAct;
     QAction *exitAct;
-    QAction *cutAct;
-    QAction *copyAct;
-    QAction *pasteAct;
     QAction *zoominAct;
     QAction *zoomoutAct;
-    QAction *rotateAct;
     QAction *undoAct;
-    QAction *redoAct;
     QAction *contourAct;
     QAction *maskAct;
     QAction *debugAct;

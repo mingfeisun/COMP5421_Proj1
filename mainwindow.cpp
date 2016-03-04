@@ -19,6 +19,7 @@ MainWindow::MainWindow()
     readSettings();
 
     initLogo();
+    initDisable(false);
     setCurrentFile("");
     setUnifiedTitleAndToolBarOnMac(true);
 }
@@ -41,6 +42,17 @@ void MainWindow::initLogo(){
    pathTree=img;
    costGraph=img;
    minPath=img;
+}
+
+void MainWindow::initDisable(bool val)
+{
+   saveAsAct->setEnabled(val);
+   zoominAct->setEnabled(val);
+   zoomoutAct->setEnabled(val);
+   undoAct->setEnabled(val);
+   contourAct->setEnabled(val);
+   maskAct->setEnabled(val);
+   debugAct->setEnabled(val);
 }
 
 void MainWindow::open()
@@ -82,27 +94,14 @@ bool MainWindow::saveAs()
     return saveFile(files.at(0));
 }
 
-bool MainWindow::cut(){
-    return true;
-}
-
-bool MainWindow::paste(){
-    return true;
-}
-
-bool MainWindow::copy(){
-    return true;
-}
 
 bool MainWindow::zoomIn(){
+    picLabel->setPixmap(img_pro->zoomIn());
     return true;
 }
 
 bool MainWindow::zoomOut(){
-    return true;
-}
-
-bool MainWindow::rotate(){
+    picLabel->setPixmap(img_pro->zoomOut());
     return true;
 }
 
@@ -111,10 +110,6 @@ bool MainWindow::undo(){
         img_pro->dropLastSeed();
         picLabel->setPixmap(img_pro->toPixmap());
     }
-    return true;
-}
-
-bool MainWindow::redo(){
     return true;
 }
 
@@ -178,6 +173,7 @@ bool MainWindow::debug(){
 
 
     connect(debugTab,SIGNAL(currentChanged(int)), this, SLOT(debugMode(int)));
+    connect(this, SIGNAL(pixmapChanged(QPixmap)), this, SLOT(showOriginalImg(QPixmap)));
 
     if(debugWin != NULL)
         return true;
@@ -250,6 +246,11 @@ void MainWindow::debugMode(int ind)
     }
 }
 
+void MainWindow::showOriginalImg(QPixmap curr_img)
+{
+    debLabel->setPixmap(curr_img);
+}
+
 void MainWindow::showDebugMinPath()
 {
     minPathLabel->setPixmap(img_pro->toMinPathPixmap());
@@ -290,21 +291,6 @@ void MainWindow::createActions()
     exitAct->setStatusTip(tr("Exit the COMP 5421 Proj"));
     connect(exitAct, SIGNAL(triggered()), this, SLOT(close()));
 
-    cutAct = new QAction(QIcon(":/images/cut.png"), tr("Cu&t"), this);
-    cutAct->setShortcuts(QKeySequence::Cut);
-    cutAct->setStatusTip(tr("Cut the selected area to the clipboard"));
-    connect(cutAct, SIGNAL(triggered()), this, SLOT(cut()));
-
-    copyAct = new QAction(QIcon(":/images/copy.png"), tr("&Copy"), this);
-    copyAct->setShortcuts(QKeySequence::Copy);
-    copyAct->setStatusTip(tr("Copy the selected area to the clipboard"));
-    connect(copyAct, SIGNAL(triggered()), this, SLOT(copy()));
-
-    pasteAct = new QAction(QIcon(":/images/paste.png"), tr("&Paste"), this);
-    pasteAct->setShortcuts(QKeySequence::Paste);
-    pasteAct->setStatusTip(tr("Paste the selected area into the current selection"));
-    connect(pasteAct, SIGNAL(triggered()), this, SLOT(paste()));
-
     zoominAct = new QAction(QIcon(":/images/zoom-in.png"), tr("Zoom &In"), this);
     zoominAct->setShortcuts(QKeySequence::ZoomIn);
     zoominAct->setStatusTip(tr("Zoom in the image"));
@@ -315,18 +301,10 @@ void MainWindow::createActions()
     zoomoutAct->setStatusTip(tr("Zoom out the image"));
     connect(zoomoutAct, SIGNAL(triggered()), this , SLOT(zoomOut()));
 
-    rotateAct = new QAction(QIcon(":/images/rotate.png"), tr("&Rotate"), this);
-    rotateAct->setStatusTip(tr("Rotate the image"));
-    connect(rotateAct, SIGNAL(triggered()), this, SLOT(rotate()));
-
     undoAct = new QAction(QIcon(":/images/undo.png"), tr("&Undo"), this);
     undoAct->setShortcuts(QKeySequence::Undo);
     undoAct->setStatusTip(tr("Undo the latest strike"));
     connect(undoAct, SIGNAL(triggered()), this, SLOT(undo()));
-
-    redoAct = new QAction(QIcon(":/images/redo.png"), tr("Red&o"), this);
-    redoAct->setStatusTip(tr("Redo the latest strike"));
-    connect(redoAct, SIGNAL(triggered()), this, SLOT(redo()));
 
     contourAct = new QAction(QIcon(":/images/contour.png"), tr("&Contour"), this);
     contourAct->setStatusTip(tr("Draw the contour"));
@@ -365,14 +343,8 @@ void MainWindow::createMenus()
     editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(zoominAct);
     editMenu->addAction(zoomoutAct);
-    editMenu->addAction(rotateAct);
-    editMenu->addSeparator();
-    editMenu->addAction(cutAct);
-    editMenu->addAction(copyAct);
-    editMenu->addAction(pasteAct);
     editMenu->addSeparator();
     editMenu->addAction(undoAct);
-    editMenu->addAction(redoAct);
 
     scissorMenu = menuBar()->addMenu(tr("&Scissor"));
     scissorMenu->addAction(contourAct);
@@ -399,14 +371,9 @@ void MainWindow::createToolBars()
     editToolBar = addToolBar(tr("Edit"));
     editToolBar->addAction(zoominAct);
     editToolBar->addAction(zoomoutAct);
-    editToolBar->addAction(rotateAct);
     editToolBar->addSeparator();
-    editToolBar->addAction(cutAct);
-    editToolBar->addAction(copyAct);
-    editToolBar->addAction(pasteAct);
     editToolBar->addSeparator();
     editToolBar->addAction(undoAct);
-    editToolBar->addAction(redoAct);
 
     scissorToolBar=addToolBar(tr("Scissor"));
     addToolBar(Qt::LeftToolBarArea, scissorToolBar);
@@ -471,6 +438,7 @@ void MainWindow::loadFile(const QString &fileName)
     }
     img_pro = new ImgPro(img);
     //picLabel->setPixmap(img_pro->toPixmap());
+    initDisable(true);
     statusBar()->showMessage(tr("Image %1 loaded")
                              .arg(fileName), 4000);
 }

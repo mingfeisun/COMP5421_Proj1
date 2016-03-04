@@ -50,6 +50,8 @@ public:
     QPixmap toCostGraphPixmap();
     QPixmap toPathTreePixmap();
     QPixmap toMinPathPixmap();
+    QPixmap zoomOut();
+    QPixmap zoomIn();
 
 };
 
@@ -567,4 +569,30 @@ QPixmap ImgPro::toMinPathPixmap()
     }
     return QPixmap::fromImage(img);
 
+}
+
+QPixmap ImgPro::zoomOut()
+{
+    QImage img(width/2, height/2, QImage::Format_RGB32);
+    for(int i=0; i<height/2; i++){
+        for(int j=0; j<width/2; j++){
+            QColor color(im[0][2*i][2*j],im[1][2*i][2*j],im[2][2*i][2*j]);
+            QPoint p(j,i);
+            img.setPixel(p, color.rgb());
+        }
+    }
+    return QPixmap::fromImage(img);
+}
+
+QPixmap ImgPro::zoomIn()
+{
+    QImage img(2*width, 2*height, QImage::Format_RGB32);
+    for(int i=0; i<2*height; i++){
+        for(int j=0; j<2*width; j++){
+            QColor color(im[0][i/2][j/2],im[1][i/2][j/2],im[2][i/2][j/2]);
+            QPoint p(j,i);
+            img.setPixel(p, color.rgb());
+        }
+    }
+    return QPixmap::fromImage(img);
 }
