@@ -487,11 +487,11 @@ QPixmap ImgPro::toPathTreePixmap()
             QColor color(255,0,0);
             QPoint p(3*j+1,3*i+1);
             img.setPixel(p, color.rgb());
+            double temp = 255;
             for(int k=0; k<8; k++){
                 p.setX(3*j+1+lin_x[k]);
                 p.setY(3*i+1+lin_y[k]);
                 //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
-                double temp = 255;
                 color.setRed(temp);
                 color.setGreen(temp);
                 color.setBlue(temp);
@@ -502,14 +502,14 @@ QPixmap ImgPro::toPathTreePixmap()
             color.setRed(255);
             color.setGreen(0);
             color.setBlue(0);
-            p.setX(3*j+1); p.setY(3*i+1);
-            img.setPixel(p, color.rgb());
+            //p.setX(3*j+1); p.setY(3*i+1);
+            //img.setPixel(p, color.rgb());
             p.setX(3*j+1+diff_x); p.setY(3*i+1+diff_y);
             img.setPixel(p, color.rgb());
             p.setX(3*j+1+2*diff_x); p.setY(3*i+1+2*diff_y);
             img.setPixel(p, color.rgb());
-            p.setX(3*j+1+3*diff_x); p.setY(3*i+1+3*diff_y);
-            img.setPixel(p, color.rgb());
+            //p.setX(3*j+1+3*diff_x); p.setY(3*i+1+3*diff_y);
+            //img.setPixel(p, color.rgb());
         }
     }
     return QPixmap::fromImage(img);
@@ -534,11 +534,11 @@ QPixmap ImgPro::toMinPathPixmap()
             QColor color(255,0,0);
             QPoint p(3*j+1,3*i+1);
             img.setPixel(p, color.rgb());
+            double temp = 255;
             for(int k=0; k<8; k++){
                 p.setX(3*j+1+lin_x[k]);
                 p.setY(3*i+1+lin_y[k]);
                 //double temp = px[i][j].cost[k] == max_cost ? 255 : px[i][j].cost[k];
-                double temp = 255;
                 color.setRed(temp);
                 color.setGreen(temp);
                 color.setBlue(temp);
