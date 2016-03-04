@@ -429,7 +429,9 @@ QPixmap ImgPro::toPixmap(){
         for(int j=0; j<width; j++){
             QColor color(im[0][i][j],im[1][i][j],im[2][i][j]);
             if(cont[i][j] != 0 || cont_temp[i][j] != 0){
-                color.setRed(255); color.setGreen(0); color.setBlue(0);
+                color.setRed(0);
+                color.setGreen(255);
+                color.setBlue(255-im[0][i][j]);
             }
             QPoint p(j,i);
             img.setPixel(p, color.rgb());
