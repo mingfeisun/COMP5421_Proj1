@@ -46,6 +46,7 @@ public:
     void closureSeed(int i, int j);
     QPixmap toPixmap();
     QPixmap toMaskPixmap();
+    QPixmap toMaskSavedPixmap();
     QPixmap toPixelNodePixmap();
     QPixmap toCostGraphPixmap();
     QPixmap toPathTreePixmap();
@@ -428,6 +429,11 @@ QPixmap ImgPro::toMaskPixmap()
         }
     }
     return QPixmap::fromImage(img);
+}
+
+QPixmap ImgPro::toMaskSavedPixmap()
+{
+   QPixmap mask_img = toMaskPixmap();
 }
 
 QPixmap ImgPro::toPixelNodePixmap()
